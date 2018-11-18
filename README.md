@@ -1,4 +1,4 @@
-# requests-negotiate
+# requests-proxy-negotiate
 
 An implementation of HTTP Negotiate authentication ([RFC 4559](http://tools.ietf.org/html/rfc4559)) for [requests](http://docs.python-requests.org/en/latest/), modified to handle connections through a proxy server responsible for the authentication.
 
