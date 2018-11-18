@@ -17,7 +17,7 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 
-class HTTPNegotiateAuth(AuthBase):
+class HTTPProxyNegotiateAuth(AuthBase):
     def __init__(self, service='HTTP', service_name=None,
                  negotiate_client_name=None):
         self.service = service
@@ -25,7 +25,7 @@ class HTTPNegotiateAuth(AuthBase):
         self.negotiate_client_name = negotiate_client_name
 
     def __call__(self, request):
-        request.register_hook('response', self.handle_401)
+        request.register_hook('response', self.handle_407)
         return request
 
     def get_hostname(self, response):
@@ -63,12 +63,12 @@ class HTTPNegotiateAuth(AuthBase):
     def get_challenges(self, response):
         challenges = {}
         for k, v in response.headers.items():
-             if k.lower() == 'www-authenticate':
+             if k.lower() == 'proxy-authenticate':
                  challenges.update(www_authenticate.parse(v))
         return challenges
 
-    def handle_401(self, response, **kwargs):
-        logger.debug("Starting to handle 401 error")
+    def handle_407(self, response, **kwargs):
+        logger.debug("Starting to handle 407 error")
         logger.debug(response.headers)
         challenges = self.get_challenges(response)
         logger.debug("auth_methods={0}".format(challenges))
@@ -85,11 +85,11 @@ class HTTPNegotiateAuth(AuthBase):
             if challenges['negotiate'] else None
 
         out_token = ctx.step(in_token)
-        while response.status_code == 401 and not ctx.complete:
+        while response.status_code == 407 and not ctx.complete:
             response.content
             response.raw.release_conn()
             new_request = response.request.copy()
-            new_request.headers['Authorization'] = \
+            new_request.headers['Proxy-Authorization'] = \
                 'Negotiate ' + base64.b64encode(out_token).decode('ascii')
             new_response = response.connection.send(new_request, **kwargs)
             new_response.history.append(response)
