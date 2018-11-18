@@ -9,9 +9,9 @@ Negotiate authentication is commonly used to provide Kerberos authentication thr
 Here's a trivial example:
 
     import requests
-    import requests_negotiate
+    import requests_proxy_negotiate
 
-    auth = requests_negotiate.HTTPProxyNegotiateAuth()
+    auth = requests_proxy_negotiate.HTTPProxyNegotiateAuth()
     response = requests.get('https://example.org/', auth=auth)
 
 You'll need a valid Kerberos ticket - acquired using e.g. `kinit` - for this to work.
